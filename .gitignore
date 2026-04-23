@@ -1,0 +1,19 @@
+# Archivos que Godot genera automáticamente y no queremos subir al repositorio.
+# Es el equivalente a los "__pycache__" de Python: archivos que se regeneran solos.
+
+# Carpeta de caché interna de Godot (se regenera al abrir el proyecto).
+.godot/
+
+# Archivos de importación temporales generados por Godot.
+*.import
+
+# Archivos de exportación compilados del juego.
+export.cfg
+export_presets.cfg
+
+# Archivos de usuario locales (configuración propia de cada desarrollador).
+*.user
+
+# Archivos del sistema operativo.
+.DS_Store
+Thumbs.db
