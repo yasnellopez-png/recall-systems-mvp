@@ -21,6 +21,10 @@ extends Camera2D
 # Lo puedes pensar como una ruta de carpetas: "../World/Kael" = sube un nivel, entra en World, coge a Kael.
 @export var target_path: NodePath
 
+# Si target_path falla o está vacío, la cámara buscará un nodo con este nombre en toda la escena.
+# Útil como "red de seguridad" si se te olvida asignar el target en el editor.
+@export var fallback_target_name: String = "Kael"
+
 # Velocidad de suavizado del seguimiento. Más alto = se pega antes al objetivo.
 # Godot tiene suavizado integrado en Camera2D; solo le pasamos este número.
 @export var smoothing_speed: float = 8.0
@@ -47,14 +51,47 @@ var _target: Node2D = null
 
 # _ready() se ejecuta una sola vez cuando la cámara entra en la escena.
 func _ready() -> void:
-	# Si nos dieron un target_path válido, buscamos el nodo y lo guardamos.
+	# ---- DIAGNÓSTICO: imprime en la consola "Output" de Godot ----
+	# Así, al correr el juego, vemos exactamente qué encuentra la cámara.
+	# "%" y "%s" funcionan como el "f-string" de Python pero con sintaxis vieja tipo "printf".
+	print("[FollowCamera] Arrancando. Mi ruta en el árbol es: ", get_path())
+	print("[FollowCamera] target_path configurado en el inspector: '", target_path, "'")
+
+	# -------------------------------------------------------------
+	# INTENTO 1: usar el target_path que viene del editor (main.tscn).
+	# -------------------------------------------------------------
 	# get_node_or_null(ruta) devuelve el nodo si existe, o null si no.
 	# En Python sería como "target = cosas.get('kael', None)" (no falla si no está).
 	if target_path != NodePath(""):
 		_target = get_node_or_null(target_path)
+		if _target != null:
+			print("[FollowCamera] OK - Objetivo encontrado por target_path: ", _target.get_path())
+		else:
+			# push_warning() muestra un aviso amarillo en el panel "Debugger" de Godot.
+			push_warning("[FollowCamera] AVISO - target_path no resolvió a ningún nodo: '%s'" % target_path)
 
-	# Activamos el suavizado de posición integrado de Camera2D.
-	# Así la cámara no "pega saltos"; se desliza suavemente hacia el objetivo.
+	# -------------------------------------------------------------
+	# INTENTO 2 (fallback): buscar por nombre en todo el árbol.
+	# -------------------------------------------------------------
+	# Si el primer intento no funcionó, recorremos la escena buscando un
+	# Node2D que se llame como "fallback_target_name" (por defecto "Kael").
+	# Así la cámara sigue funcionando aunque el path esté mal o vacío.
+	if _target == null:
+		print("[FollowCamera] Fallback: buscando Node2D llamado '", fallback_target_name, "' en toda la escena...")
+		_target = _find_node2d_by_name(get_tree().root, fallback_target_name)
+		if _target != null:
+			print("[FollowCamera] OK - Objetivo encontrado por fallback: ", _target.get_path())
+
+	# Si después de ambos intentos seguimos sin objetivo, avisamos fuerte.
+	# push_error() muestra un error rojo en el panel de errores.
+	if _target == null:
+		push_error("[FollowCamera] ERROR - No se encontró objetivo; la cámara se quedará quieta.")
+
+	# -------------------------------------------------------------
+	# Configuración visual de la cámara (igual que antes).
+	# -------------------------------------------------------------
+	# position_smoothing_enabled activa el suavizado integrado de Camera2D.
+	# Sin esto, la cámara pegaría saltos bruscos al seguir al personaje.
 	position_smoothing_enabled = true
 	position_smoothing_speed = smoothing_speed
 
@@ -64,6 +101,18 @@ func _ready() -> void:
 	# make_current() le dice a Godot "usa esta cámara para renderizar".
 	# Si hay varias Camera2D en la escena, gana la que llame a make_current().
 	make_current()
+
+	# -------------------------------------------------------------
+	# Posición inicial = sobre el objetivo.
+	# -------------------------------------------------------------
+	# Si no hacemos esto, la cámara aparece en (0,0) y "navega" hasta
+	# llegar al personaje durante el primer segundo de juego.
+	# Al colocarla directamente sobre el objetivo, evitamos ese efecto raro.
+	if _target != null:
+		global_position = _target.global_position
+		# reset_smoothing() limpia el histórico de suavizado para que el
+		# "teletransporte" inicial no genere una interpolación al arrancar.
+		reset_smoothing()
 
 
 # _process(delta) se ejecuta cada frame gráfico (no físico).
@@ -75,3 +124,25 @@ func _process(_delta: float) -> void:
 	# (convención común en Godot y Python para parámetros ignorados).
 	if _target != null:
 		global_position = _target.global_position
+
+
+# -------------------------------------------------------------------
+# HELPERS PRIVADOS
+# -------------------------------------------------------------------
+
+# Busca recursivamente un Node2D por nombre en el árbol de escena.
+# "recursivamente" significa que también revisa a todos los hijos, y los hijos
+# de los hijos, etc. En Python sería la misma idea con un "def find(root, name):".
+# Devuelve el primero que encuentre, o null si no existe.
+func _find_node2d_by_name(root: Node, wanted_name: String) -> Node2D:
+	# Caso base: ¿este mismo nodo cumple? Debe llamarse igual Y ser Node2D.
+	# "root is Node2D" es como isinstance(root, Node2D) en Python.
+	if root.name == wanted_name and root is Node2D:
+		return root as Node2D
+	# Caso recursivo: preguntamos a cada hijo.
+	for child in root.get_children():
+		var found: Node2D = _find_node2d_by_name(child, wanted_name)
+		if found != null:
+			return found
+	# Si nadie cumple, devolvemos null.
+	return null
