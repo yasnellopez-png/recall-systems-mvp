@@ -52,6 +52,13 @@ var last_direction: Vector2 = Vector2.DOWN
 # _ready() se ejecuta una sola vez cuando el nodo entra en la escena.
 # Es el equivalente al "__init__" de una clase en Python, aunque no es constructor real.
 func _ready() -> void:
+	# Añadimos a Kael al grupo "player". Los grupos en Godot son como
+	# "etiquetas" que permiten identificar nodos sin comparar nombres.
+	# Así los enemigos pueden preguntar "¿este cuerpo está en el grupo player?"
+	# en vez de "¿este cuerpo se llama 'Kael'?". Es más robusto y flexible.
+	# En Python sería similar a poner un atributo tipo self.tags = {"player"}.
+	add_to_group("player")
+
 	# Imprime en la consola de Godot para confirmar que Kael está listo.
 	# En Python sería "print('Kael listo...')".
 	print("Kael listo para moverse en el mundo de Éter Roto.")

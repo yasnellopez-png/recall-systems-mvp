@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/kael.tscn" id="1_kael_scene"]
 [ext_resource type="Script" path="res://scripts/world/world_placeholder.gd" id="2_world_script"]
 [ext_resource type="Script" path="res://scripts/world/follow_camera.gd" id="3_cam_script"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/patrol_enemy.tscn" id="4_enemy_scene"]
 
 [node name="Main" type="Node2D"]
 
@@ -12,6 +13,10 @@ script = ExtResource("2_world_script")
 
 [node name="Kael" parent="World" instance=ExtResource("1_kael_scene")]
 position = Vector2(320, 200)
+
+[node name="PatrolEnemy" parent="World" instance=ExtResource("4_enemy_scene")]
+position = Vector2(540, 260)
+patrol_points = Array[Vector2]([Vector2(440, 220), Vector2(640, 220), Vector2(540, 360)])
 
 [node name="FollowCamera" type="Camera2D" parent="."]
 script = ExtResource("3_cam_script")
