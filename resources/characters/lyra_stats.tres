@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_stats.gd" id="1_lyra_stats_script"]
+
+[resource]
+script = ExtResource("1_lyra_stats_script")
+character_name = "Lyra"
+max_hp = 70
+atk = 12
+spd = 14
+def = 0
+max_eter = 0
+elementos_debiles = Array[String]([])
+elementos_resistentes = Array[String]([])

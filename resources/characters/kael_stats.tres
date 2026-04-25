@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_stats.gd" id="1_kael_stats_script"]
+
+[resource]
+script = ExtResource("1_kael_stats_script")
+character_name = "Kael"
+max_hp = 100
+atk = 15
+spd = 8
+def = 0
+max_eter = 0
+elementos_debiles = Array[String]([])
+elementos_resistentes = Array[String]([])

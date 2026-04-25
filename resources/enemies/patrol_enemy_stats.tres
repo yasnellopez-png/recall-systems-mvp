@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_stats.gd" id="1_patrol_enemy_stats_script"]
+
+[resource]
+script = ExtResource("1_patrol_enemy_stats_script")
+character_name = "Patrullero"
+max_hp = 50
+atk = 10
+spd = 5
+def = 0
+max_eter = 0
+elementos_debiles = Array[String]([])
+elementos_resistentes = Array[String]([])
